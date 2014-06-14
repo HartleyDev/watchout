@@ -1,75 +1,70 @@
-(function(){
+var gameOption = {
+  width: 700,
+  height: 700,
+  numberOfEnemy: 50
+};
 
-  var gameOptions = {
-    height: 600,
-    width: 1000,
-    nEnemies: 50,
-    padding: 20
-  };
+var enemies = [];
+for (var i = 0; i < gameOption.numberOfEnemy; i++){
+  enemies.push({
+    'cx': Math.random() * (gameOption.width ),
+    'cy': Math.random() * (gameOption.height ),
+    'r': 15
+  });
+}
 
-  var gameStats = {
-    score: 0,
-    bestScore: 0,
-  };
-
-  // lookup what the heck this means
-  // namespace:tagname
-  var axes = {
-    x: d3.scale.linear().domain([0, 100]).range([0, gameOptions.width]),
-    y: d3.scale.linear().domain([0, 100]).range([0, gameOptions.height])
-  };
-  // if no container does not work add container div
-  // what is svg:svg
-  var gameBoard = d3.select('.container').append('svg:svg')
-                      .attr('width', gameOptions.width)
-                      .attr('height', gameOptions.height);
+var gameBoard = d3.select('body')
+                  .append('svg')
+                  .attr('width', gameOption.width)
+                  .attr('height', gameOption.height)
 
 
 
+var circleGroup = gameBoard.append('g')
+                           // .attr('width', gameOption.width - 100)
+                           // .attr('height', gameOption.height - 100);
 
-  //write function updateScore
-  //write function updateBestScore
-
-
-  //write class  Player
-
-
-
-  var createEnemies = function() {
-    return _.range(0, gameOptions.nEnemies).map(function(i) {
-      return {
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100
-      };
-    });
-  };
-
-  var render = function(enemy_data){
-    var enemies = gameBoard.selectAll('circle.enemy')
-              .data(enemy_data, function(d) { return d.id; });
-
-    enemies.enter()
-      .append('svg:circle')
-        .attr('class', 'enemy')
-        .attr('cx', function(enemy){ return axes.x(enemy.x);})
-        .attr('cy', function(enemy){ return axes.y(enemy.y);})
-        .attr('r', 20);
-
-    enemies.exit().remove();
+var circles = circleGroup.selectAll('circle')
+                      .data(enemies)
+                      .enter()
+                        .append('circle')
+                        .attr('cx', function(d){return d.cx;})
+                        .attr('cy', function(d){return d.cy;})
+                        .attr('r', function(d){return d.r;})
+                        .attr('id', function(d, i){ return i;})
+                        .style('fill', 'black');
 
 
-  };
-
-  var play = function(){
-    var gameTurn = function(){
-      var newEnemyPostions = createEnemies();
-      render(newEnemyPostions);
-    };
-    gameTurn();
-  };
-
-  play();
+var updateEnemies = function (enemies){
+  for (var i = 0; i < enemies.length; i++){
+    enemies[i]['cx'] =  Math.random() * (gameOption.width );
+    enemies[i]['cy'] =  Math.random() * (gameOption.height);
+  }
+  return enemies
+};
 
 
-}).call(this);
+console.log(updateEnemies(enemies));
+
+
+
+var tween = function(eCircles){
+  eCircles.data(updateEnemies(enemies))
+          .transition()
+            .duration(1000)
+              .attr('cx', function(d){return d.cx;})
+              .attr('cy', function(d){return d.cy;});
+};
+
+setInterval (function(){
+   tween(circles);
+
+}, 2000);
+
+
+
+
+
+
+
+
